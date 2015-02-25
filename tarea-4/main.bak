@@ -1,0 +1,95 @@
+#lang scheme
+
+(define tolist
+  (lambda (vals)
+    (if (list? vals) vals (list vals))
+  )
+)
+
+(define circ
+  (lambda (vals)
+    (append (cdr vals) (tolist (car vals)))
+  )
+)
+
+(define leer 
+  (lambda (archivo) 
+    (let ((p (open-input-file archivo)))
+      (let f ((x (read p)))
+        (if (eof-object? x)
+          (begin
+            (close-input-port p)
+            '()
+           )
+    	   (cons x (f (read p)))
+        )
+      )
+    )
+  )
+)
+
+(define addelem
+  (lambda (elem lista)
+    (if (empty? lista)
+       '()
+       (cons (cons elem (tolist (car lista))) (addelem elem (cdr lista)))
+     )
+   )
+)
+
+(define waddelem
+  (lambda (elem lista)
+    (if (empty? lista)
+        (list elem)
+        (cons (cons elem (tolist (car lista))) (addelem elem (cdr lista)))
+     )
+   )
+)
+
+;(define combinaciones
+;  (lambda (lista)
+;    
+;  )
+;)
+
+;(define palabras (leer "words_1.txt"))
+;palabras
+;(addelem 1 '((2 3) 4 5))
+
+
+(define checkmatch
+  (lambda (vals)
+    (if (eq? 1 (car vals))
+      #t
+      #f
+    )
+  )
+)
+
+(define bkt
+  (lambda (vals chunk)
+    (if (empty? chunk)
+    '()
+    (append (waddelem (car chunk) (bkt (cdr vals) (cdr vals))) (bkt (circ vals) (cdr chunk)))
+    )
+  )
+)
+
+(define optbkt
+  (lambda (vals chunk)
+    (if (empty? chunk)
+    '()
+    (if (checkmatch (waddelem (car chunk) (bkt (cdr vals) (cdr vals))))
+      (waddelem (car chunk) (bkt (cdr vals) (cdr vals)))
+      (bkt (circ vals) (cdr chunk)))
+    )
+  )
+)
+
+(define wbkt
+  (lambda (vals)
+    (optbkt vals vals)
+  )
+)
+
+(wbkt '(1 2))
